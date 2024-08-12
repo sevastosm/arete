@@ -1,99 +1,124 @@
-import { useState } from "react";
-import axios from "axios";
+"use client";
 
-export default function Form() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [acceptTerms, setAcceptTerms] = useState(false);
-  const [status, setStatus] = useState("");
+import { FC, useState } from "react";
+import { useForm } from "react-hook-form";
+import { sendEmail } from "@/app/utils/send-email";
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus("");
+export type FormData = {
+  name: string;
+  email: string;
+  message: string;
+  termsAccepted: boolean;
+};
 
-    try {
-      const response = await axios.post("api/send-email/", {
-        name,
-        email,
-        message,
-        acceptTerms,
-      });
+const Form: FC = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>();
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
-      if (response.status === 200) {
-        setStatus("Email sent successfully!");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setStatus("Error sending email.");
+  async function onSubmit(data: FormData) {
+    if (!data.termsAccepted) {
+      alert("You must accept the terms and conditions to submit the form.");
+      return;
     }
-  };
+
+    setLoading(true);
+    try {
+      await sendEmail(data);
+      setSuccessMessage("Email sent successfully!");
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage("An error occurred while sending the email.");
+      setSuccessMessage(null);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-lg mx-auto">
-      <div className="mb-4">
-        <label className="block text-white text-sm mb-2" htmlFor="name">
-          Name
-        </label>
-        <input
-          className="w-full py-3 px-3 bg-white text-black"
-          id="name"
-          type="text"
-          placeholder="Your Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block text-white text-sm mb-2" htmlFor="email">
-          Email
-        </label>
-        <input
-          className="w-full py-3 px-3 text-black bg-white"
-          id="email"
-          type="email"
-          placeholder="Your Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block text-white text-sm mb-2" htmlFor="message">
-          Message
-        </label>
-        <textarea
-          className="w-full py-3 px-3 text-black bg-white min-h-[100px]"
-          id="message"
-          placeholder="Your Message"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          className="flex items-center text-white text-sm"
-          htmlFor="acceptTerms"
-        >
+    <div>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="mb-5">
+          <label htmlFor="name" className="mb-2 block text-sm text-white">
+            Full Name
+          </label>
           <input
-            className="mr-2"
-            id="acceptTerms"
-            type="checkbox"
-            checked={acceptTerms}
-            onChange={(e) => setAcceptTerms(e.target.checked)}
+            type="text"
+            placeholder="Full Name"
+            className="w-full border border-gray-300 bg-white py-3 px-6 text-base font-medium text-gray-700 outline-none focus:border-purple-500 focus:shadow-md"
+            {...register("name", { required: "Full Name is required" })}
           />
-          I accept the terms
-        </label>
-      </div>
-      <div className="mb-4">
-        <button
-          className=" text-black bg-white py-2 px-4"
-          type="submit"
-          disabled={!acceptTerms}
-        >
-          Send
-        </button>
-      </div>
-      {status && <div className="mt-4 text-white">{status}</div>}
-    </form>
+          {errors.name && <p className="text-red-500">{errors.name.message}</p>}
+        </div>
+        <div className="mb-5">
+          <label htmlFor="email" className="mb-2 block text-sm text-white">
+            Email Address
+          </label>
+          <input
+            type="email"
+            placeholder="example@domain.com"
+            className="w-full border border-gray-300 bg-white py-3 px-6 text-base font-medium text-gray-700 outline-none focus:border-purple-500 focus:shadow-md"
+            {...register("email", { required: "Email Address is required" })}
+          />
+          {errors.email && (
+            <p className="text-red-500">{errors.email.message}</p>
+          )}
+        </div>
+        <div className="mb-5">
+          <label htmlFor="message" className="mb-2 block text-sm text-white">
+            Message
+          </label>
+          <textarea
+            rows={4}
+            placeholder="Type your message"
+            className="w-full resize-none border border-gray-300 bg-white py-3 px-6 text-base font-medium text-gray-700 outline-none focus:border-purple-500 focus:shadow-md"
+            {...register("message", { required: "Message is required" })}
+          ></textarea>
+          {errors.message && (
+            <p className="text-red-500">{errors.message.message}</p>
+          )}
+        </div>
+        <div className="mb-5">
+          <input
+            type="checkbox"
+            id="termsAccepted"
+            {...register("termsAccepted", {
+              required: "You must accept the terms and conditions",
+            })}
+          />
+          <label
+            htmlFor="termsAccepted"
+            className="ml-2 text-sm font-medium text-white"
+          >
+            I accept the{" "}
+            <a href="/terms" className="text-white underline">
+              terms and conditions
+            </a>
+            .
+          </label>
+          {errors.termsAccepted && (
+            <p className="text-red-500">{errors.termsAccepted.message}</p>
+          )}
+        </div>
+        <div>
+          <button
+            type="submit"
+            className="hover:shadow-form bg-white py-3 px-8 text-base font-semibold text-black outline-none"
+            disabled={loading}
+          >
+            {loading ? "Loading..." : "Submit"}
+          </button>
+        </div>
+      </form>
+      {successMessage && <p className="mt-4 text-white">{successMessage}</p>}
+      {errorMessage && <p className="mt-4 text-red-500">{errorMessage}</p>}
+    </div>
   );
-}
+};
+
+export default Form;

@@ -14,7 +14,7 @@ type Props = {};
 
 export default function Footer({}: Props) {
   return (
-    <footer className="px-1 md:px-8 z-30 w-full flex flex-col justify-center  bg-stone-500">
+    <footer className="px-1 md:px-8 z-10 w-full flex flex-col justify-center  bg-stone-500">
       <div className="py-[80px]">
         <div className="flex gap-[68px] text-zinc-900 items-center justify-between max-md:flex-col">
           <div className="flex flex-col gap-4 max-md:ml-0 max-md:w-full ">

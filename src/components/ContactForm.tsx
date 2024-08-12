@@ -110,7 +110,7 @@ const ContactForm: React.FC = () => {
           </div>
         </div>
         <div className="col-span-1 bg-[#1C1C1C]">
-          <div className="md:flex min-h-[72px] flex items-center bg-[#1C1C1C] hidden">
+          <div className="md:flex min-h-[72px] items-center bg-[#1C1C1C] hidden">
             <div className="my-3 me-[38.5px] bg-[#1C1C1C] w-full flex items-center justify-end">
               <Image
                 className="w-[24px] h-[24px] cursor-pointer"

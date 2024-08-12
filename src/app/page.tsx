@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import Gallery from "@/components/Gallery";
 import Hero from "@/components/Hero";
 import Services from "@/components/Services";
+import Form from "@/components/Form";
 
 export default function Home() {
   const photos = [
